@@ -17,29 +17,7 @@ const rootReducer = combineReducers({
 export const makeStore = () => {
   return configureStore({
     reducer: rootReducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({
-        serializableCheck: {
-          ignoredActions: [
-            "api/executeMutation/pending",
-            "api/executeMutation/fulfilled",
-            "api/executeMutation/rejected",
-          ],
-          ignoredActionPaths: [
-            "meta.arg.originalArgs.file",
-            "meta.arg.originalArgs.formData",
-            "payload.chapter.video",
-            "meta.baseQueryMeta.request",
-            "meta.baseQueryMeta.response",
-          ],
-          ignoredPaths: [
-            "global.courseEditor.sections",
-            "entities.videos.data",
-            "meta.baseQueryMeta.request",
-            "meta.baseQueryMeta.response",
-          ],
-        },
-      }).concat(api.middleware),
+    middleware: (getDefault) => getDefault().concat(api.middleware),
   });
 };
 
