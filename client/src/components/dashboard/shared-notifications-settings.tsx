@@ -12,13 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { CustomFormField } from "../custom-form-field";
 import Header from "../header";
+import { LoaderCircle } from "lucide-react";
 
 const SharedNotificationSettings = ({
   title = "Notification Settings",
   subtitle = "Manage your notification settings",
 }: SharedNotificationSettingsProps) => {
   const { user } = useUser();
-  const [updateUser] = useUpdateUserMutation();
+  const [updateUser, { isLoading }] = useUpdateUserMutation();
 
   const currentSettings =
     (user?.publicMetadata as { settings?: UserSettings })?.settings || {};
@@ -93,7 +94,12 @@ const SharedNotificationSettings = ({
             />
           </div>
 
-          <Button type="submit" className="notification-settings__submit">
+          <Button
+            disabled={isLoading}
+            type="submit"
+            className="notification-settings__submit"
+          >
+            {isLoading && <LoaderCircle className="h-5 w-5 animate-spin" />}
             Update Settings
           </Button>
         </form>
