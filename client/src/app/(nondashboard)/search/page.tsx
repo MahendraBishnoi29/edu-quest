@@ -1,11 +1,11 @@
 "use client";
 
+import CourseCardSearch from "@/components/course-card-search";
 import Loading from "@/components/loading";
-import { useGetCourseQuery, useGetCoursesQuery } from "@/state/api";
+import { useGetCoursesQuery } from "@/state/api";
+import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import CourseCardSearch from "@/components/course-card-search";
 import SelectedCourse from "./selected-course";
 
 const Search = () => {
