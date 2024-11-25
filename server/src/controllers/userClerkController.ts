@@ -9,14 +9,16 @@ export const updateUser = async (
   const userData = req.body;
 
   try {
-    await clerkClient.users.updateUserMetadata(userId, {
+    const user = await clerkClient.users.updateUserMetadata(userId, {
       publicMetadata: {
         userType: userData.publicMetadata.userType,
         settings: userData.publicMetadata.settings,
       },
     });
 
-    res.status(200).json({ message: "course updated successfully" });
+    res
+      .status(200)
+      .json({ message: "course updated successfully", data: user });
   } catch (error) {
     res.status(500).json({ message: "error updating user", error });
   }
