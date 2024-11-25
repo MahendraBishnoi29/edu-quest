@@ -18,8 +18,8 @@ export const updateUser = async (
 
     res
       .status(200)
-      .json({ message: "course updated successfully", data: user });
+      .json({ message: "user settings updated successfully", data: user });
   } catch (error) {
-    res.status(500).json({ message: "error updating user", error });
+    res.status(500).json({ message: "error updating user settings", error });
   }
 };
