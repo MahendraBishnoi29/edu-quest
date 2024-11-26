@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import Course from "../models/courseModel";
+import AWS from "aws-sdk";
 import { v4 as uuidv4 } from "uuid";
 import { getAuth } from "@clerk/express";
+
+const s3 = new AWS.S3();
 
 export const listCourses = async (
   req: Request,
@@ -13,29 +16,24 @@ export const listCourses = async (
       category && category !== "all"
         ? await Course.scan("category").eq(category).exec()
         : await Course.scan().exec();
-    res
-      .status(200)
-      .json({ message: "courses retrieved successfully", data: courses });
+    res.json({ message: "Courses retrieved successfully", data: courses });
   } catch (error) {
-    res.status(500).json({ message: "error retrieving courses", error });
+    res.status(500).json({ message: "Error retrieving courses", error });
   }
 };
 
 export const getCourse = async (req: Request, res: Response): Promise<void> => {
   const { courseId } = req.params;
-
   try {
     const course = await Course.get(courseId);
     if (!course) {
-      res.status(404).json({ message: "course not found" });
+      res.status(404).json({ message: "Course not found" });
       return;
     }
 
-    res
-      .status(200)
-      .json({ message: "course retrieved successfully", data: course });
+    res.json({ message: "Course retrieved successfully", data: course });
   } catch (error) {
-    res.status(500).json({ message: "error retrieving course", error });
+    res.status(500).json({ message: "Error retrieving course", error });
   }
 };
 
@@ -45,8 +43,9 @@ export const createCourse = async (
 ): Promise<void> => {
   try {
     const { teacherId, teacherName } = req.body;
+
     if (!teacherId || !teacherName) {
-      res.status(404).json({ message: "Teacher Id and name are required" });
+      res.status(400).json({ message: "Teacher Id and name are required" });
       return;
     }
 
@@ -64,12 +63,11 @@ export const createCourse = async (
       sections: [],
       enrollments: [],
     });
-
     await newCourse.save();
 
     res.json({ message: "Course created successfully", data: newCourse });
   } catch (error) {
-    res.status(500).json({ message: "error creating course", error });
+    res.status(500).json({ message: "Error creating course", error });
   }
 };
 
@@ -83,23 +81,25 @@ export const updateCourse = async (
 
   try {
     const course = await Course.get(courseId);
-
     if (!course) {
-      res.status(404).json({ message: "course not found" });
+      res.status(404).json({ message: "Course not found" });
       return;
     }
 
     if (course.teacherId !== userId) {
       res
         .status(403)
-        .json({ message: "You are not authorized to update this course" });
+        .json({ message: "Not authorized to update this course " });
       return;
     }
 
     if (updateData.price) {
-      const price = parseFloat(updateData.price);
+      const price = parseInt(updateData.price);
       if (isNaN(price)) {
-        res.status(400).json({ message: "Price must be a valid number" });
+        res.status(400).json({
+          message: "Invalid price format",
+          error: "Price must be a valid number",
+        });
         return;
       }
       updateData.price = price * 100;
@@ -124,11 +124,9 @@ export const updateCourse = async (
     Object.assign(course, updateData);
     await course.save();
 
-    res
-      .status(200)
-      .json({ message: "Course updated successfully", data: course });
+    res.json({ message: "Course updated successfully", data: course });
   } catch (error) {
-    res.status(500).json({ message: "error updating course", error });
+    res.status(500).json({ message: "Error updating course", error });
   }
 };
 
@@ -141,23 +139,56 @@ export const deleteCourse = async (
 
   try {
     const course = await Course.get(courseId);
-
     if (!course) {
-      res.status(404).json({ message: "course not found" });
+      res.status(404).json({ message: "Course not found" });
       return;
     }
 
     if (course.teacherId !== userId) {
       res
         .status(403)
-        .json({ message: "You are not authorized to delete this course" });
+        .json({ message: "Not authorized to delete this course " });
       return;
     }
 
     await Course.delete(courseId);
 
-    res.status(200).json({ message: "Course deleted successfully" });
+    res.json({ message: "Course deleted successfully", data: course });
   } catch (error) {
-    res.status(500).json({ message: "error deleting course", error });
+    res.status(500).json({ message: "Error deleting course", error });
+  }
+};
+
+export const getUploadVideoUrl = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { fileName, fileType } = req.body;
+
+  if (!fileName || !fileType) {
+    res.status(400).json({ message: "File name and type are required" });
+    return;
+  }
+
+  try {
+    const uniqueId = uuidv4();
+    const s3Key = `videos/${uniqueId}/${fileName}`;
+
+    const s3Params = {
+      Bucket: process.env.S3_BUCKET_NAME || "",
+      Key: s3Key,
+      Expires: 60,
+      ContentType: fileType,
+    };
+
+    const uploadUrl = s3.getSignedUrl("putObject", s3Params);
+    const videoUrl = `${process.env.CLOUDFRONT_DOMAIN}/videos/${uniqueId}/${fileName}`;
+
+    res.json({
+      message: "Upload URL generated successfully",
+      data: { uploadUrl, videoUrl },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error generating upload URL", error });
   }
 };
