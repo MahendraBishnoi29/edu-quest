@@ -65,11 +65,9 @@ export const createCourse = async (
       enrollments: [],
     });
 
-    await Course.save();
+    await newCourse.save();
 
-    res
-      .status(200)
-      .json({ message: "Course created successfully", data: newCourse });
+    res.json({ message: "Course created successfully", data: newCourse });
   } catch (error) {
     res.status(500).json({ message: "error creating course", error });
   }
