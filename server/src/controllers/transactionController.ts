@@ -105,3 +105,22 @@ export const createTransaction = async (
       .json({ message: "error creating transaction enrollment", error });
   }
 };
+
+export const listTransactions = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { userId } = req.body;
+  try {
+    const transactions = userId
+      ? await Transaction.query("userId").eq("userId").exec()
+      : await Transaction.scan().exec();
+
+    res.status(200).json({
+      message: "Transactions retrieved successfully",
+      data: transactions,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "error retrieving transactions", error });
+  }
+};
