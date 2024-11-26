@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import helmet from "helmet";
 import morgan from "morgan";
 import * as dynamoose from "dynamoose";
+import serverless from "serverless-http";
 
 import courseRoutes from "./routes/courseRoute";
 import userClerkRoutes from "./routes/userClerkRoutes";
@@ -15,6 +16,7 @@ import {
   createClerkClient,
   requireAuth,
 } from "@clerk/express";
+import seed from "./seed/seedDynamodb";
 
 // Configuration
 dotenv.config();
@@ -58,3 +60,18 @@ if (!isProduction) {
     console.log(`Server is running on port ${PORT}`);
   });
 }
+
+// AWS prod environment
+const serverlessApp = serverless(app);
+
+export const handle = async (event: any, context: any) => {
+  if (event.action == "seed") {
+    await seed();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Database seeded successfully" }),
+    };
+  } else {
+    return serverlessApp(event, context);
+  }
+};
