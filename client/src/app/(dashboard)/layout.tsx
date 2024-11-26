@@ -6,7 +6,7 @@ import Navbar from "@/components/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardLayout({
@@ -31,8 +31,7 @@ export default function DashboardLayout({
   }, [isCoursePage, pathname]);
 
   if (!isLoaded) return <Loading />;
-  if (!user) return <div>Please sign in to access this page.</div>;
-
+  if (!user) return redirect("/signin");
   return (
     <SidebarProvider>
       <div className="dashboard">
