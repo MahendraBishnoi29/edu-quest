@@ -9,11 +9,11 @@ import {
   createCourseFormData,
   uploadAllVideos,
 } from "@/lib/utils";
-// import { openSectionModal, setSections } from "@/state";
+
 import {
   useGetCourseQuery,
   useUpdateCourseMutation,
-  //   useGetUploadVideoUrlMutation,
+  useGetUploadVideoUrlMutation,
 } from "@/state/api";
 import { useAppDispatch, useAppSelector } from "@/state/redux";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,7 +35,7 @@ const CourseEditor = () => {
   const id = params.id as string;
   const { data: course, isLoading, refetch } = useGetCourseQuery(id);
   const [updateCourse] = useUpdateCourseMutation();
-  //   const [getUploadVideoUrl] = useGetUploadVideoUrlMutation();
+  const [getUploadVideoUrl] = useGetUploadVideoUrlMutation();
 
   const dispatch = useAppDispatch();
   const { sections } = useAppSelector((state) => state.global.courseEditor);
@@ -66,13 +66,13 @@ const CourseEditor = () => {
 
   const onSubmit = async (data: CourseFormData) => {
     try {
-      // const updatedSections = await uploadAllVideos(
-      //   sections,
-      //   id,
-      //   getUploadVideoUrl
-      // );
+      const updatedSections = await uploadAllVideos(
+        sections,
+        id,
+        getUploadVideoUrl
+      );
 
-      const formData = createCourseFormData(data, sections);
+      const formData = createCourseFormData(data, updatedSections);
 
       await updateCourse({
         courseId: id,

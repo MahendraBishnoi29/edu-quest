@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Loading from "@/components/loading";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useCourseProgressData } from "@/hooks/useCourseProgressData";
-import { cn } from "@/lib/utils";
+import { useState, useEffect, useRef } from "react";
 import {
-  CheckCircle,
   ChevronDown,
   ChevronUp,
   FileText,
+  CheckCircle,
   Trophy,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { useSidebar } from "@/components/ui/sidebar";
+import { useCourseProgressData } from "@/hooks/useCourseProgressData";
+import Loading from "@/components/loading";
 
 const ChaptersSidebar = () => {
   const router = useRouter();
@@ -65,7 +65,7 @@ const ChaptersSidebar = () => {
           section={section}
           index={index}
           sectionProgress={userProgress.sections.find(
-            (s: { sectionId: string }) => s.sectionId === section.sectionId
+            (s) => s.sectionId === section.sectionId
           )}
           chapterId={chapterId as string}
           courseId={courseId as string}
